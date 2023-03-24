@@ -27,6 +27,10 @@ carb_fin <- read_csv("financial.csv", na="") %>%
     mutate(
         scope1_2 = scope1 + scope2,
         scope1_2_3 = scope1 + scope2 + scope3_up,
-        carb_inten_rev_1_2 = scope1_2 / revt,
-        carb_inten_rev_1_2_3 = scope1_2_3 / revt
+        inten_rev_1_2 = scope1_2 / revt,
+        inten_rev_1_2_3 = scope1_2_3 / revt,
+        inten_asset_1_2 = scope1_2 / at,
+        inten_asset_1_2_3 = scope1_2_3 / at,
+        inten_asset_long_1_2 = scope1_2 / (at - act),
+        inten_asset_long_1_2_3 = scope1_2_3 / (at - act)
     )
