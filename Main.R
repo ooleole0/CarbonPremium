@@ -56,4 +56,17 @@ carb_fin <- read_csv("financial.csv", na="") %>%
 # remove unnecessary datasheets
 remove(carbon, SIC_sheet)
 
-stock <- read_csv("stock.csv", na = "")
+stock <- read_csv("stock.csv", na = "")%>%
+    select(
+        gvkey,
+        datadate,
+        cyear,
+        cmth,
+        exchg,
+        tic,
+        cusip,
+        prccm,
+        trfm,
+        trt1m,
+        cshtrm
+    )
