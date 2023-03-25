@@ -42,7 +42,14 @@ carb_fin <- read_csv("financial.csv", na="") %>%
     group_by(gvkey) %>%
     mutate(
         scope1_2_grow = scope1_2 - lag(scope1_2),
-        scope1_2_grow_r = scope1_2_grow / lag(scope1_2)
+        scope1_2_grow_r = scope1_2_grow / lag(scope1_2),
+        inten_rev_1_2_grow_r =
+            (inten_rev_1_2 - lag(inten_rev_1_2)) / lag(inten_rev_1_2),
+        inten_asset_1_2_grow_r =
+            (inten_asset_1_2 - lag(inten_asset_1_2)) / lag(inten_asset_1_2),
+        inten_asset_long_1_2_grow_r =
+            (inten_asset_long_1_2 - lag(inten_asset_long_1_2)) /
+            lag(inten_asset_long_1_2)
     ) %>%
     ungroup()
 
