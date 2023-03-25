@@ -17,12 +17,16 @@ carbon <- read_csv("carbon.csv", na="") %>%
 carb_fin <- read_csv("financial.csv", na="") %>%
     select(
         gvkey,
-        sic,
         datadate,
         fyear,
         act,
         at,
-        revt
+        revt,
+        ebitda,
+        epsfi,
+        epsfx,
+        epspi,
+        epspx
     ) %>%
     left_join(carbon, by = c("gvkey", "fyear")) %>%
     # create carbon-related variables
