@@ -14,8 +14,6 @@ carbon <- read_csv("carbon.csv", na="") %>%
            scope3_up
     )
 
-SIC_sheet <- read_csv("SIC_sheet.csv", col_types = "c", na="")
-
 carb_fin <- read_csv("financial.csv", na="") %>%
     select(
         gvkey,
@@ -27,7 +25,6 @@ carb_fin <- read_csv("financial.csv", na="") %>%
         revt
     ) %>%
     left_join(carbon, by = c("gvkey", "fyear")) %>%
-    left_join(SIC_sheet, by = "sic") %>%
     # create carbon-related variables
     mutate(
         scope1_2 = scope1 + scope2,
@@ -54,7 +51,7 @@ carb_fin <- read_csv("financial.csv", na="") %>%
     ungroup()
 
 # remove unnecessary datasheets
-remove(carbon, SIC_sheet)
+remove(carbon)
 
 stock <- read_csv("stock.csv", na = "")%>%
     select(
@@ -69,4 +66,13 @@ stock <- read_csv("stock.csv", na = "")%>%
         trfm,
         trt1m,
         cshtrm
-    )
+    )%>%
+    # correct the return units as they are of percentages
+    mutate(
+        trfm = 0.01 * trfm,
+        trt1m = 0.01 * trt1m,
+        sorting_year = case_when(
+            cmth <= 6 ~ cyear - 1,
+            cmth >= 7 ~ cyear)
+    )%>%
+    left_join(carb_fin, by = join_by(gvkey, sorting_year == fyear))
