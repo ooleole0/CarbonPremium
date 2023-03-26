@@ -244,3 +244,109 @@ stock <- stock %>%
                                                        inten_asset_1_2_grow_r_q80 ~ '5')
     )
 
+# pick the needed "type" variables
+data_typed <- stock %>%
+    select(datadate.x,
+           gvkey,
+           trt1m,
+           mktcap,
+           scope1_2_type,
+           scope1_2_grow_type,
+           scope1_2_grow_r_type,
+           scope1_2_3_type,
+           inten_rev_1_2_grow_r_type,
+           inten_asset_1_2_grow_r_type
+           ) %>%
+    group_by(gvkey) %>%
+    mutate(weight = lag(mktcap)) %>%
+    ungroup()
+
+# construct new weighted mean function since weighted.mean doesn't handle 
+# NA weights
+weighted_mean = function(x, w, ..., na.rm = F){
+    if(na.rm){
+        keep = !is.na(x)&!is.na(w)
+        w = w[keep]
+        x = x[keep]
+    }
+    weighted.mean(x, w, ..., na.rm = F)
+}
+
+# valuate different portfolios' returns
+portf_scope1_2 <- data_typed %>% 
+    group_by(datadate.x, scope1_2_type) %>% 
+    summarise(vwret = weighted_mean(trt1m, w = weight, na.rm = T)) %>%
+    ungroup()
+
+portf_scope1_2 <- portf_scope1_2 %>% 
+    pivot_wider(
+        id_cols = datadate.x,
+        values_from = vwret,
+        names_from = c(scope1_2_type),
+        names_sep = ""
+    )
+
+portf_scope1_2_grow <- data_typed %>% 
+    group_by(datadate.x, scope1_2_grow_type) %>% 
+    summarise(vwret = weighted_mean(trt1m, w = weight, na.rm = T)) %>%
+    ungroup()
+
+portf_scope1_2_grow <- portf_scope1_2_grow %>% 
+    pivot_wider(
+        id_cols = datadate.x,
+        values_from = vwret,
+        names_from = c(scope1_2_grow_type),
+        names_sep = ""
+    )
+
+portf_scope1_2_grow_r <- data_typed %>% 
+    group_by(datadate.x, scope1_2_grow_r_type) %>% 
+    summarise(vwret = weighted_mean(trt1m, w = weight, na.rm = T)) %>%
+    ungroup()
+
+portf_scope1_2_grow_r <- portf_scope1_2_grow_r %>% 
+    pivot_wider(
+        id_cols = datadate.x,
+        values_from = vwret,
+        names_from = c(scope1_2_grow_r_type),
+        names_sep = ""
+    )
+
+portf_scope1_2_3 <- data_typed %>% 
+    group_by(datadate.x, scope1_2_3_type) %>% 
+    summarise(vwret = weighted_mean(trt1m, w = weight, na.rm = T)) %>%
+    ungroup()
+
+portf_scope1_2_3 <- portf_scope1_2_3 %>% 
+    pivot_wider(
+        id_cols = datadate.x,
+        values_from = vwret,
+        names_from = c(scope1_2_3_type),
+        names_sep = ""
+    )
+
+portf_inten_rev_1_2_grow_r <- data_typed %>% 
+    group_by(datadate.x, inten_rev_1_2_grow_r_type) %>% 
+    summarise(vwret = weighted_mean(trt1m, w = weight, na.rm = T)) %>%
+    ungroup()
+
+portf_inten_rev_1_2_grow_r <- portf_inten_rev_1_2_grow_r %>% 
+    pivot_wider(
+        id_cols = datadate.x,
+        values_from = vwret,
+        names_from = c(inten_rev_1_2_grow_r_type),
+        names_sep = ""
+    )
+
+portf_inten_asset_1_2_grow_r <- data_typed %>% 
+    group_by(datadate.x, inten_asset_1_2_grow_r_type) %>% 
+    summarise(vwret = weighted_mean(trt1m, w = weight, na.rm = T)) %>%
+    ungroup()
+
+portf_inten_asset_1_2_grow_r <- portf_inten_asset_1_2_grow_r %>% 
+    pivot_wider(
+        id_cols = datadate.x,
+        values_from = vwret,
+        names_from = c(inten_asset_1_2_grow_r_type),
+        names_sep = ""
+    )
