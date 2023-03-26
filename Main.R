@@ -69,8 +69,8 @@ stock <- read_csv("stock.csv", na = "")%>%
         cmth,
         exchg,
         tic,
-        cusip,
         prccm,
+        cshom,
         trfm,
         trt1m,
         cshtrm
@@ -78,6 +78,7 @@ stock <- read_csv("stock.csv", na = "")%>%
     filter(exchg == c(10 , 11)) %>%
     # correct the return units as they are of percentages
     mutate(
+        mktcap = abs(prccm) * cshom,
         trfm = 0.01 * trfm,
         trt1m = 0.01 * trt1m,
         sorting_year = case_when(
@@ -156,7 +157,7 @@ inten_asset_1_2_grow_r_breakpoints <- stock %>%
             quantile(inten_asset_1_2_grow_r, 0.8, na.rm = TRUE)
     )
 
-# merge breakpoints\
+# merge breakpoints
 stock <- stock %>%
     left_join(scope1_2_breakpoints, by = "sorting_year") %>%
     left_join(scope1_2_grow_breakpoints, by = "sorting_year") %>%
@@ -164,3 +165,82 @@ stock <- stock %>%
     left_join(scope1_2_3_breakpoints, by = "sorting_year") %>%
     left_join(inten_rev_1_2_grow_r_breakpoints, by = "sorting_year") %>%
     left_join(inten_asset_1_2_grow_r_breakpoints, by = "sorting_year")
+
+# flag groups
+stock <- stock %>%
+    mutate(scope1_2_type = case_when(scope1_2 <= scope1_2_q20 ~ '1',
+                                     scope1_2 > scope1_2_q20 &
+                                         scope1_2 <= scope1_2_q40 ~ '2',
+                                     scope1_2 > scope1_2_q40 &
+                                         scope1_2 <= scope1_2_q60 ~ '3',
+                                     scope1_2 > scope1_2_q60 &
+                                         scope1_2 <= scope1_2_q80 ~ '4',
+                                     scope1_2 > scope1_2_q80 ~ '5'),
+           scope1_2_grow_type = case_when(scope1_2_grow <=
+                                              scope1_2_grow_q20 ~ '1',
+                                          scope1_2_grow > scope1_2_grow_q20 &
+                                              scope1_2_grow <=
+                                              scope1_2_grow_q40 ~ '2',
+                                          scope1_2_grow > scope1_2_grow_q40 &
+                                              scope1_2_grow <=
+                                              scope1_2_grow_q60 ~ '3',
+                                          scope1_2_grow > scope1_2_grow_q60 &
+                                              scope1_2_grow <=
+                                              scope1_2_grow_q80 ~ '4',
+                                          scope1_2_grow >
+                                              scope1_2_grow_q80 ~ '5'),
+           scope1_2_grow_r_type = case_when(scope1_2_grow_r <=
+                                                scope1_2_grow_r_q20 ~ '1',
+                                          scope1_2_grow_r > scope1_2_grow_r_q20 &
+                                              scope1_2_grow_r <=
+                                              scope1_2_grow_r_q40 ~ '2',
+                                          scope1_2_grow_r > scope1_2_grow_r_q40 &
+                                              scope1_2_grow_r <=
+                                              scope1_2_grow_r_q60 ~ '3',
+                                          scope1_2_grow_r > scope1_2_grow_r_q60 &
+                                              scope1_2_grow_r <=
+                                              scope1_2_grow_r_q80 ~ '4',
+                                          scope1_2_grow_r >
+                                              scope1_2_grow_r_q80 ~'5'),
+           scope1_2_3_type = case_when(scope1_2_3 <= scope1_2_3_q20 ~ '1',
+                                       scope1_2_3 > scope1_2_3_q20 &
+                                           scope1_2_3 <= scope1_2_3_q40 ~ '2',
+                                       scope1_2_3 > scope1_2_3_q40 &
+                                           scope1_2_3 <= scope1_2_3_q60 ~ '3',
+                                       scope1_2_3 > scope1_2_3_q60 &
+                                           scope1_2_3 <= scope1_2_3_q80 ~ '4',
+                                       scope1_2_3 > scope1_2_3_q80 ~ '5'),
+           inten_rev_1_2_grow_r_type = case_when(inten_rev_1_2_grow_r <=
+                                                     inten_rev_1_2_grow_r_q20 ~ '1',
+                                            inten_rev_1_2_grow_r >
+                                                inten_rev_1_2_grow_r_q20 &
+                                                inten_rev_1_2_grow_r <=
+                                                inten_rev_1_2_grow_r_q40 ~ '2',
+                                            inten_rev_1_2_grow_r >
+                                                inten_rev_1_2_grow_r_q40 &
+                                                inten_rev_1_2_grow_r <=
+                                                inten_rev_1_2_grow_r_q60 ~ '3',
+                                            inten_rev_1_2_grow_r >
+                                                inten_rev_1_2_grow_r_q60 &
+                                                inten_rev_1_2_grow_r <=
+                                                inten_rev_1_2_grow_r_q80 ~ '4',
+                                            inten_rev_1_2_grow_r >
+                                                inten_rev_1_2_grow_r_q80 ~ '5'),
+           inten_asset_1_2_grow_r_type = case_when(inten_asset_1_2_grow_r <=
+                                                       inten_asset_1_2_grow_r_q20 ~ '1',
+                                                   inten_asset_1_2_grow_r >
+                                                       inten_asset_1_2_grow_r_q20 &
+                                                       inten_asset_1_2_grow_r <=
+                                                       inten_asset_1_2_grow_r_q40 ~ '2',
+                                                   inten_asset_1_2_grow_r >
+                                                       inten_asset_1_2_grow_r_q40 &
+                                                       inten_asset_1_2_grow_r <=
+                                                       inten_asset_1_2_grow_r_q60 ~ '3',
+                                                   inten_asset_1_2_grow_r >
+                                                       inten_asset_1_2_grow_r_q60 &
+                                                       inten_asset_1_2_grow_r <=
+                                                       inten_asset_1_2_grow_r_q80 ~ '4',
+                                                   inten_asset_1_2_grow_r >
+                                                       inten_asset_1_2_grow_r_q80 ~ '5')
+    )
+
