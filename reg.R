@@ -1,22 +1,22 @@
 library(tidyverse)
-library(zoo)
 library(lubridate)
+library(PerformanceAnalytics)
+library(ggplot2)
+library(ggthemes)
 library(GRS.test)
+library(lmtest)
+library(sandwich)
+library(ggrepel)
 
-PORT_USMARKET <- read.csv("PORT_USMARKET.csv", na = ".")
+PORT_USMARKET <- read.csv("PORT_USMARKET.csv")
 
-Y = PORT_USMARKET[,2:50]
-x = as.matrix(PORT_USMARKET[,"Mkt_RF"])
-mx = colMeans(x)
-rf = PORT_USMARKET[,"RF"]
-Act_Ret = numeric(ncol(Y))
-Pred_Ret = Act_Ret
+# valuate alpha and beta
+ret_mat <- PORT_USMARKET[, 5:74] - PORT_USMARKET$RF
+Mkt_RF_mat <- PORT_USMARKET$Mkt - PORT_USMARKET$RF
+GRS_result <- GRS.test(ret_mat, Mkt_RF_mat)
 
-for(i in 1:ncol(Y)){
-    y = Y[,i]-rf
-    #  mdl = lm(y ~ x[,"Mkt-RF"])
-    #  Pred_Ret[i] = mdl$coef[2]*mx[1]
-    mdl = lm(y ~ x) 
-    Pred_Ret[i] = sum(mdl$coef[2]*mx)
-    Act_Ret[i] = mean(y)
-}
+# regression by groups
+sd_m_RF <- PORT_USMARKET$scope1Type_1 - PORT_USMARKET$RF
+Mkt_m_RF <- PORT_USMARKET$Mkt - PORT_USMARKET$RF
+capm_fit <- lm(sd_m_RF ~ Mkt_m_RF, PORT_USMARKET)
+coeftest(capm_fit, vcov = NeweyWest)
