@@ -16,7 +16,9 @@ monthly_ff_3_factors <- ff_3_factors$subsets$data[[1]]
 PORT_USMARKET <- read.csv("PORT_USMARKET.csv")
 
 PORT_USMARKET_LS <- PORT_USMARKET %>% 
-                    select(scope1LS, 
+                    select(date,
+                           RF,
+                           scope1LS, 
                            scope2LS, 
                            scope3LS,
                            scope1_2LS,
@@ -31,22 +33,38 @@ PORT_USMARKET_LS <- PORT_USMARKET %>%
                            s1_2IntSecDevLS,
                            s1_2_3IntSecDevLS
                            )
+PORT_USMARKET_LS_nodate <- PORT_USMARKET_LS %>% select(-date, -RF)
 
 # launch t-test
 
-t_temp <- numeric(ncol(PORT_USMARKET_LS))
+t_temp <- numeric(ncol(PORT_USMARKET_LS_nodate))
 
-for(i in 1:ncol(PORT_USMARKET_LS)){
-    t_result <- t.test(PORT_USMARKET[,"Mkt"], PORT_USMARKET_LS[,i])
+for(i in 1:ncol(PORT_USMARKET_LS_nodate)){
+    t_result <- t.test(PORT_USMARKET_LS_nodate[,i], mu = 0)
     t_temp[i] <- t_result$p.value
 }
 
+# calculate sharpe ratio
+
+PORT_USMARKET_LS_xts <- xts(PORT_USMARKET_LS[, -1],
+                            order.by = as.Date(PORT_USMARKET_LS$date)) 
+
+sharpe_temp <- numeric(ncol(PORT_USMARKET_LS_xts)-1)
+
+for(i in 1:ncol(PORT_USMARKET_LS_xts)-1){
+    sharpe_temp[i] <- SharpeRatio.annualized(PORT_USMARKET_LS_xts[, i+1, drop = FALSE], 
+                                             Rf = PORT_USMARKET_LS_xts[, "RF", drop = FALSE],
+                                             scale = 12)
+}
 
 
 monthly_ff_3_factors <- monthly_ff_3_factors %>% 
                         select(-`Mkt-RF`, -RF) %>% 
                         mutate(
-                        date = as.Date(cut(as.Date(paste0(date, "01"), format = "%Y%m%d") + 32, 'month')) - 1,
+                        date = as.Date(
+                            cut(as.Date(
+                                paste0(date, "01"), 
+                                format = "%Y%m%d") + 32, 'month')) - 1,
                         SMB = SMB / 100,
                         HML = HML /100
                      )
