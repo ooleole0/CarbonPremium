@@ -53,9 +53,15 @@ sharpe_temp <- numeric(ncol(PORT_USMARKET_LS_xts)-1)
 
 for(i in 1:ncol(PORT_USMARKET_LS_xts)-1){
     sharpe_temp[i] <- SharpeRatio.annualized(PORT_USMARKET_LS_xts[, i+1, drop = FALSE], 
-                                             Rf = PORT_USMARKET_LS_xts[, "RF", drop = FALSE],
+                                             Rf = 0,
                                              scale = 12)
 }
+
+# calculate sharpe ratio manually
+
+LSmeans <- colMeans(PORT_USMARKET_LS_nodate, na.rm = TRUE)
+LSsd <- sapply(PORT_USMARKET_LS_nodate, sd, na.rm = TRUE)
+LS_sharpe <- (LSmeans/LSsd) * sqrt(12)
 
 
 monthly_ff_3_factors <- monthly_ff_3_factors %>% 
@@ -69,34 +75,34 @@ monthly_ff_3_factors <- monthly_ff_3_factors %>%
                         HML = HML /100
                      )
 
-# start here
-
-dat = merge(PORT_USMARKET,monthly_ff_3_factors) 
-dat = dat[dat$date>196306,]
-
-Y = dat[,2:26]
-x = as.matrix(dat[,c("Mkt-RF","SMB","HML")])
-mx = colMeans(x)
-rf = dat[,"RF"]
-Act_Ret = numeric(ncol(Y))
-Pred_Ret = Act_Ret
-
-for(i in 1:ncol(Y)){
-    y = Y[,i]-rf
-    #  mdl = lm(y ~ x[,"Mkt-RF"])
-    #  Pred_Ret[i] = mdl$coef[2]*mx[1]
-    mdl = lm(y ~ x) 
-    Pred_Ret[i] = sum(mdl$coef[2:4]*mx)
-    Act_Ret[i] = mean(y)
-}
-
-# valuate alpha and beta
-ret_mat <- PORT_USMARKET[, 5:88] - PORT_USMARKET$RF
-Mkt_RF_mat <- PORT_USMARKET$Mkt - PORT_USMARKET$RF
-GRS_result <- GRS.test(ret_mat, Mkt_RF_mat)
-
-# regression by groups
-sd_m_RF <- PORT_USMARKET$scope1Type_1 - PORT_USMARKET$RF
-Mkt_m_RF <- PORT_USMARKET$Mkt - PORT_USMARKET$RF
-capm_fit <- lm(sd_m_RF ~ Mkt_m_RF, PORT_USMARKET)
-coeftest(capm_fit, vcov = NeweyWest)
+# # start here
+# 
+# dat = merge(PORT_USMARKET,monthly_ff_3_factors) 
+# dat = dat[dat$date>196306,]
+# 
+# Y = dat[,2:26]
+# x = as.matrix(dat[,c("Mkt-RF","SMB","HML")])
+# mx = colMeans(x)
+# rf = dat[,"RF"]
+# Act_Ret = numeric(ncol(Y))
+# Pred_Ret = Act_Ret
+# 
+# for(i in 1:ncol(Y)){
+#     y = Y[,i]-rf
+#     #  mdl = lm(y ~ x[,"Mkt-RF"])
+#     #  Pred_Ret[i] = mdl$coef[2]*mx[1]
+#     mdl = lm(y ~ x) 
+#     Pred_Ret[i] = sum(mdl$coef[2:4]*mx)
+#     Act_Ret[i] = mean(y)
+# }
+# 
+# # valuate alpha and beta
+# ret_mat <- PORT_USMARKET[, 5:88] - PORT_USMARKET$RF
+# Mkt_RF_mat <- PORT_USMARKET$Mkt - PORT_USMARKET$RF
+# GRS_result <- GRS.test(ret_mat, Mkt_RF_mat)
+# 
+# # regression by groups
+# sd_m_RF <- PORT_USMARKET$scope1Type_1 - PORT_USMARKET$RF
+# Mkt_m_RF <- PORT_USMARKET$Mkt - PORT_USMARKET$RF
+# capm_fit <- lm(sd_m_RF ~ Mkt_m_RF, PORT_USMARKET)
+# coeftest(capm_fit, vcov = NeweyWest)
