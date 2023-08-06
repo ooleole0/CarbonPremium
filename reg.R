@@ -8,6 +8,8 @@ library(lmtest)
 library(sandwich)
 library(ggrepel)
 library(frenchdata)
+library(purrr)
+library(broom)
 
 data_sets <- get_french_data_list()
 
@@ -72,37 +74,101 @@ monthly_ff_3_factors <- monthly_ff_3_factors %>%
                                 paste0(date, "01"), 
                                 format = "%Y%m%d") + 32, 'month')) - 1,
                         SMB = SMB / 100,
-                        HML = HML /100
+                        HML = HML / 100
                      )
 
-# # start here
-# 
-# dat = merge(PORT_USMARKET,monthly_ff_3_factors) 
-# dat = dat[dat$date>196306,]
-# 
-# Y = dat[,2:26]
-# x = as.matrix(dat[,c("Mkt-RF","SMB","HML")])
-# mx = colMeans(x)
-# rf = dat[,"RF"]
-# Act_Ret = numeric(ncol(Y))
-# Pred_Ret = Act_Ret
-# 
-# for(i in 1:ncol(Y)){
-#     y = Y[,i]-rf
-#     #  mdl = lm(y ~ x[,"Mkt-RF"])
-#     #  Pred_Ret[i] = mdl$coef[2]*mx[1]
-#     mdl = lm(y ~ x) 
-#     Pred_Ret[i] = sum(mdl$coef[2:4]*mx)
-#     Act_Ret[i] = mean(y)
-# }
-# 
-# # valuate alpha and beta
-# ret_mat <- PORT_USMARKET[, 5:88] - PORT_USMARKET$RF
-# Mkt_RF_mat <- PORT_USMARKET$Mkt - PORT_USMARKET$RF
-# GRS_result <- GRS.test(ret_mat, Mkt_RF_mat)
-# 
-# # regression by groups
-# sd_m_RF <- PORT_USMARKET$scope1Type_1 - PORT_USMARKET$RF
-# Mkt_m_RF <- PORT_USMARKET$Mkt - PORT_USMARKET$RF
-# capm_fit <- lm(sd_m_RF ~ Mkt_m_RF, PORT_USMARKET)
-# coeftest(capm_fit, vcov = NeweyWest)
+# join fama's data with long-short portfolio
+
+PORT_USMARKET <- PORT_USMARKET %>% 
+    mutate(
+    date = ymd(date)
+) %>%
+    select(
+        date,
+        Mkt_RF,
+        scope1LS, 
+        scope2LS, 
+        scope3LS,
+        scope1_2LS,
+        scope1_2_3LS,
+        scope1GrowLS,
+        scope1_2GrowLS,
+        scope1_2_3GrowLS,
+        scope1IntLS,
+        scope1_2IntLS,
+        scope1_2_3IntLS,
+        s1IntSecDevLS,
+        s1_2IntSecDevLS,
+        s1_2_3IntSecDevLS
+    )
+
+PORT_USMARKET_LS_ff <- PORT_USMARKET %>%
+    left_join(monthly_ff_3_factors, by = "date") %>%
+    left_join(PORT_USMARKET) %>%
+    select(
+        date,
+        Mkt_RF,
+        SMB,
+        HML,
+        scope1LS, 
+        scope2LS, 
+        scope3LS,
+        scope1_2LS,
+        scope1_2_3LS,
+        scope1GrowLS,
+        scope1_2GrowLS,
+        scope1_2_3GrowLS,
+        scope1IntLS,
+        scope1_2IntLS,
+        scope1_2_3IntLS,
+        s1IntSecDevLS,
+        s1_2IntSecDevLS,
+        s1_2_3IntSecDevLS
+    )
+
+# regression to 1
+
+models <- lapply(paste(
+    names(PORT_USMARKET_LS_ff)[5:ncol(PORT_USMARKET_LS_ff)], "1", sep = "~"
+    ), formula
+)
+res.models <- lapply(models, FUN = function(x){
+    summary(lm(formula = x, data = PORT_USMARKET_LS_ff))
+    }
+)
+names(res.models) <- paste(
+    names(PORT_USMARKET_LS_ff)[5:ncol(PORT_USMARKET_LS_ff)], "1", sep = "~"
+)
+result <- map(res.models, glance)
+
+# regression to Mkt_RF
+
+models_Mkt_RF <- lapply(paste(
+    names(PORT_USMARKET_LS_ff)[5:ncol(PORT_USMARKET_LS_ff)], "Mkt_RF", sep = "~"
+    ), formula
+)
+res.models_Mkt_RF <- lapply(models_Mkt_RF, FUN = function(x){
+    summary(lm(formula = x, data = PORT_USMARKET_LS_ff))
+    }
+)
+names(res.models_Mkt_RF) <- paste(
+    names(PORT_USMARKET_LS_ff)[5:ncol(PORT_USMARKET_LS_ff)], "Mkt_RF", sep = "~"
+)
+result_list_Mkt_RF <- map(res.models_Mkt_RF, glance)
+result_Mkt_RF <- do.call(rbind, result_list_Mkt_RF)
+
+# regression to Mkt_RF, HML, SMB
+
+models_ff <- lapply(paste(
+    names(PORT_USMARKET_LS_ff)[5:ncol(PORT_USMARKET_LS_ff)], "Mkt_RF + HML + SMB", sep = "~"
+), formula
+)
+res.models_ff <- lapply(models_ff, FUN = function(x){
+    summary(lm(formula = x, data = PORT_USMARKET_LS_ff))
+}
+)
+names(res.models_ff) <- paste(
+    names(PORT_USMARKET_LS_ff)[5:ncol(PORT_USMARKET_LS_ff)], "Mkt_RF + HML + SMB", sep = "~"
+)
+result_list_ff <- map(res.models_ff, glance)
+result_ff <- do.call(rbind, result_list_ff)
