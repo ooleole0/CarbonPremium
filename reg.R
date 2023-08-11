@@ -20,21 +20,37 @@ PORT_USMARKET <- read.csv("PORT_USMARKET.csv")
 PORT_USMARKET_LS <- PORT_USMARKET %>% 
                     select(date,
                            RF,
-                           scope1LS, 
-                           scope2LS, 
-                           scope3LS,
-                           scope1_2LS,
-                           scope1_2_3LS,
-                           scope1GrowLS,
-                           scope1_2GrowLS,
-                           scope1_2_3GrowLS,
-                           scope1IntLS,
-                           scope1_2IntLS,
-                           scope1_2_3IntLS,
-                           s1IntSecDevLS,
-                           s1_2IntSecDevLS,
-                           s1_2_3IntSecDevLS
-                           )
+                           scope1_LS, 
+                           scope2_LS, 
+                           scope3_LS,
+                           scope1_2_LS,
+                           scope1_2_3_LS,
+                           scope1Grow_LS,
+                           scope1_2Grow_LS,
+                           scope1_2_3Grow_LS,
+                           scope1Int_LS,
+                           scope1_2Int_LS,
+                           scope1_2_3Int_LS,
+                           s1IntSecDev_LS,
+                           s1_2IntSecDev_LS,
+                           s1_2_3IntSecDev_LS
+                           ) %>%
+                    mutate(
+                        scope1_LS = scope1_LS * -1, 
+                        scope2_LS = scope2_LS * -1, 
+                        scope3_LS = scope3_LS * -1,
+                        scope1_2_LS = scope1_2_LS * -1,
+                        scope1_2_3_LS = scope1_2_3_LS * -1,
+                        scope1Grow_LS = scope1Grow_LS * -1,
+                        scope1_2Grow_LS = scope1_2Grow_LS * -1,
+                        scope1_2_3Grow_LS = scope1_2_3Grow_LS * -1,
+                        scope1Int_LS = scope1Int_LS * -1,
+                        scope1_2Int_LS = scope1_2Int_LS * -1,
+                        scope1_2_3Int_LS = scope1_2_3Int_LS * -1,
+                        s1IntSecDev_LS = s1IntSecDev_LS * -1,
+                        s1_2IntSecDev_LS = s1_2IntSecDev_LS * -1,
+                        s1_2_3IntSecDev_LS = s1_2_3IntSecDev_LS * -1
+                    )
 PORT_USMARKET_LS_nodate <- PORT_USMARKET_LS %>% select(-date, -RF)
 
 # launch t-test
@@ -86,20 +102,20 @@ PORT_USMARKET <- PORT_USMARKET %>%
     select(
         date,
         Mkt_RF,
-        scope1LS, 
-        scope2LS, 
-        scope3LS,
-        scope1_2LS,
-        scope1_2_3LS,
-        scope1GrowLS,
-        scope1_2GrowLS,
-        scope1_2_3GrowLS,
-        scope1IntLS,
-        scope1_2IntLS,
-        scope1_2_3IntLS,
-        s1IntSecDevLS,
-        s1_2IntSecDevLS,
-        s1_2_3IntSecDevLS
+        scope1_LS, 
+        scope2_LS, 
+        scope3_LS,
+        scope1_2_LS,
+        scope1_2_3_LS,
+        scope1Grow_LS,
+        scope1_2Grow_LS,
+        scope1_2_3Grow_LS,
+        scope1Int_LS,
+        scope1_2Int_LS,
+        scope1_2_3Int_LS,
+        s1IntSecDev_LS,
+        s1_2IntSecDev_LS,
+        s1_2_3IntSecDev_LS
     )
 
 PORT_USMARKET_LS_ff <- PORT_USMARKET %>%
@@ -110,67 +126,83 @@ PORT_USMARKET_LS_ff <- PORT_USMARKET %>%
         Mkt_RF,
         SMB,
         HML,
-        scope1LS, 
-        scope2LS, 
-        scope3LS,
-        scope1_2LS,
-        scope1_2_3LS,
-        scope1GrowLS,
-        scope1_2GrowLS,
-        scope1_2_3GrowLS,
-        scope1IntLS,
-        scope1_2IntLS,
-        scope1_2_3IntLS,
-        s1IntSecDevLS,
-        s1_2IntSecDevLS,
-        s1_2_3IntSecDevLS
+        scope1_LS, 
+        scope2_LS, 
+        scope3_LS,
+        scope1_2_LS,
+        scope1_2_3_LS,
+        scope1Grow_LS,
+        scope1_2Grow_LS,
+        scope1_2_3Grow_LS,
+        scope1Int_LS,
+        scope1_2Int_LS,
+        scope1_2_3Int_LS,
+        s1IntSecDev_LS,
+        s1_2IntSecDev_LS,
+        s1_2_3IntSecDev_LS
+    ) %>%
+    mutate(
+        scope1_LS = scope1_LS * -1, 
+        scope2_LS = scope2_LS * -1, 
+        scope3_LS = scope3_LS * -1,
+        scope1_2_LS = scope1_2_LS * -1,
+        scope1_2_3_LS = scope1_2_3_LS * -1,
+        scope1Grow_LS = scope1Grow_LS * -1,
+        scope1_2Grow_LS = scope1_2Grow_LS * -1,
+        scope1_2_3Grow_LS = scope1_2_3Grow_LS * -1,
+        scope1Int_LS = scope1Int_LS * -1,
+        scope1_2Int_LS = scope1_2Int_LS * -1,
+        scope1_2_3Int_LS = scope1_2_3Int_LS * -1,
+        s1IntSecDev_LS = s1IntSecDev_LS * -1,
+        s1_2IntSecDev_LS = s1_2IntSecDev_LS * -1,
+        s1_2_3IntSecDev_LS = s1_2_3IntSecDev_LS * -1
     )
 
 # regression to 1
 
-models <- lapply(paste(
+mode_LS <- lapply(paste(
     names(PORT_USMARKET_LS_ff)[5:ncol(PORT_USMARKET_LS_ff)], "1", sep = "~"
     ), formula
 )
-res.models <- lapply(models, FUN = function(x){
+res.mode_LS <- lapply(mode_LS, FUN = function(x){
     summary(lm(formula = x, data = PORT_USMARKET_LS_ff))
     }
 )
-names(res.models) <- paste(
+names(res.mode_LS) <- paste(
     names(PORT_USMARKET_LS_ff)[5:ncol(PORT_USMARKET_LS_ff)], "1", sep = "~"
 )
-result <- map(res.models, glance)
+result <- map(res.mode_LS, glance)
 
 # regression to Mkt_RF
 
-models_Mkt_RF <- lapply(paste(
+mode_LS_Mkt_RF <- lapply(paste(
     names(PORT_USMARKET_LS_ff)[5:ncol(PORT_USMARKET_LS_ff)], "Mkt_RF", sep = "~"
     ), formula
 )
-res.models_Mkt_RF <- lapply(models_Mkt_RF, FUN = function(x){
+res.mode_LS_Mkt_RF <- lapply(mode_LS_Mkt_RF, FUN = function(x){
     summary(lm(formula = x, data = PORT_USMARKET_LS_ff))
     }
 )
-names(res.models_Mkt_RF) <- paste(
+names(res.mode_LS_Mkt_RF) <- paste(
     names(PORT_USMARKET_LS_ff)[5:ncol(PORT_USMARKET_LS_ff)], "Mkt_RF", sep = "~"
 )
-result_list_Mkt_RF <- map(res.models_Mkt_RF, glance)
+result_list_Mkt_RF <- map(res.mode_LS_Mkt_RF, glance)
 result_Mkt_RF <- do.call(rbind, result_list_Mkt_RF)
 
 # regression to Mkt_RF, HML, SMB
 
-models_ff <- lapply(paste(
+mode_LS_ff <- lapply(paste(
     names(PORT_USMARKET_LS_ff)[5:ncol(PORT_USMARKET_LS_ff)], "Mkt_RF + HML + SMB", sep = "~"
 ), formula
 )
-res.models_ff <- lapply(models_ff, FUN = function(x){
+res.mode_LS_ff <- lapply(mode_LS_ff, FUN = function(x){
     summary(lm(formula = x, data = PORT_USMARKET_LS_ff))
 }
 )
-names(res.models_ff) <- paste(
+names(res.mode_LS_ff) <- paste(
     names(PORT_USMARKET_LS_ff)[5:ncol(PORT_USMARKET_LS_ff)], "Mkt_RF + HML + SMB", sep = "~"
 )
-result_list_ff <- map(res.models_ff, glance)
+result_list_ff <- map(res.mode_LS_ff, glance)
 result_ff <- do.call(rbind, result_list_ff)
 
 # broom::tidy method
