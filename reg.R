@@ -172,3 +172,11 @@ names(res.models_ff) <- paste(
 )
 result_list_ff <- map(res.models_ff, glance)
 result_ff <- do.call(rbind, result_list_ff)
+
+# broom::tidy method
+
+Mkt_result <- PORT_USMARKET_LS_ff %>%
+    select(-date, -SMB, -HML) %>%
+    gather(portfolio, return, -Mkt_RF) %>%
+    group_by(portfolio) %>%
+    do(tidy(lm(return~Mkt_RF, .)))
