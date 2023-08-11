@@ -10,6 +10,7 @@ library(ggrepel)
 library(frenchdata)
 library(purrr)
 library(broom)
+library(stargazer)
 
 data_sets <- get_french_data_list()
 
@@ -61,26 +62,6 @@ for(i in 1:ncol(PORT_USMARKET_LS_nodate)){
     t_result <- t.test(PORT_USMARKET_LS_nodate[,i], mu = 0)
     t_temp[i] <- t_result$p.value
 }
-
-# calculate sharpe ratio
-
-PORT_USMARKET_LS_xts <- xts(PORT_USMARKET_LS[, -1],
-                            order.by = as.Date(PORT_USMARKET_LS$date)) 
-
-sharpe_temp <- numeric(ncol(PORT_USMARKET_LS_xts)-1)
-
-for(i in 1:ncol(PORT_USMARKET_LS_xts)-1){
-    sharpe_temp[i] <- SharpeRatio.annualized(PORT_USMARKET_LS_xts[, i+1, drop = FALSE], 
-                                             Rf = 0,
-                                             scale = 12)
-}
-
-# calculate sharpe ratio manually
-
-LSmeans <- colMeans(PORT_USMARKET_LS_nodate, na.rm = TRUE)
-LSsd <- sapply(PORT_USMARKET_LS_nodate, sd, na.rm = TRUE)
-LS_sharpe <- (LSmeans/LSsd) * sqrt(12)
-
 
 monthly_ff_3_factors <- monthly_ff_3_factors %>% 
                         select(-`Mkt-RF`, -RF) %>% 
@@ -219,3 +200,9 @@ ff_result <- PORT_USMARKET_LS_ff %>%
     gather(portfolio, return, -c("Mkt_RF", "HML", "SMB")) %>%
     group_by(portfolio) %>%
     do(tidy(lm(return~Mkt_RF + HML + SMB, .)))
+
+# stargazer output
+stargazer(ff_result, type = "html", 
+          summary = FALSE, 
+          rownames = FALSE, 
+          out = "ff_result.html")
