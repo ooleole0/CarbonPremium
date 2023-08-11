@@ -205,10 +205,17 @@ names(res.mode_LS_ff) <- paste(
 result_list_ff <- map(res.mode_LS_ff, glance)
 result_ff <- do.call(rbind, result_list_ff)
 
-# broom::tidy method
-
+# regression to Mkt_RF broom::tidy method
 Mkt_result <- PORT_USMARKET_LS_ff %>%
     select(-date, -SMB, -HML) %>%
     gather(portfolio, return, -Mkt_RF) %>%
     group_by(portfolio) %>%
     do(tidy(lm(return~Mkt_RF, .)))
+
+# regression to Mkt_RF, HML, SMB broom::tidy method
+
+ff_result <- PORT_USMARKET_LS_ff %>%
+    select(-date) %>%
+    gather(portfolio, return, -c("Mkt_RF", "HML", "SMB")) %>%
+    group_by(portfolio) %>%
+    do(tidy(lm(return~Mkt_RF + HML + SMB, .)))
