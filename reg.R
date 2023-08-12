@@ -191,7 +191,9 @@ Mkt_result <- PORT_USMARKET_LS_ff %>%
     select(-date, -SMB, -HML) %>%
     gather(portfolio, return, -Mkt_RF) %>%
     group_by(portfolio) %>%
-    do(tidy(lm(return~Mkt_RF, .)))
+    do(tidy(lm(return~Mkt_RF, .))) %>%
+    ungroup() %>%
+    mutate_if(is.numeric, round, digits = 3)
 
 # regression to Mkt_RF, HML, SMB broom::tidy method
 
@@ -199,10 +201,12 @@ ff_result <- PORT_USMARKET_LS_ff %>%
     select(-date) %>%
     gather(portfolio, return, -c("Mkt_RF", "HML", "SMB")) %>%
     group_by(portfolio) %>%
-    do(tidy(lm(return~Mkt_RF + HML + SMB, .)))
+    do(tidy(lm(return~Mkt_RF + HML + SMB, .))) %>%
+    ungroup() %>%
+    mutate_if(is.numeric, round, digits = 3)
 
 # stargazer output
 stargazer(ff_result, type = "html", 
           summary = FALSE, 
           rownames = FALSE, 
-          out = "ff_result.html")
+          out = "ff_result.doc")

@@ -120,4 +120,6 @@ PORT_USMARKET <- Portf_LS %>% mutate(
 ) %>%
     left_join(US_Market, by = join_by(date == Mkt_date))
 
+# PORT_USMARKET %>% mutate_if(is.numeric, round, digit = 3)
+
 write.csv(PORT_USMARKET, "PORT_USMARKET.csv")
