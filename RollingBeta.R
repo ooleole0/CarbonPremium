@@ -2,7 +2,6 @@ library(tidyverse)
 library(slider)
 library(future)
 library(ggplot2)
-library(stargazer)
 
 tej <- read_csv("TEJ_CLEAN.csv")
 TWBCode <- read_csv("TWBCode.csv")
@@ -30,7 +29,6 @@ names(mode_tej_LS) <- names(tej_port_us)[13:ncol(tej_port_us)]
 
 # create a function which checks on if the time series is too short,
 # if not, return beta.
-
 estimate_capm <- function(data, min_obs = 1, var_port) {
     if (nrow(data) < min_obs) {
         beta <- as.numeric(NA)
@@ -73,7 +71,7 @@ estimate_beta <- function(data, var_port){
     data_nested <- data %>%
         nest(data = c(date, Ret, {{var_port}}), .by = c(Ticker, BCode, BName))
     
-    data_nested %>%
+    output <- data_nested %>%
         mutate(
             beta = furrr::future_map(
                 data,
@@ -91,9 +89,36 @@ estimate_beta <- function(data, var_port){
             beta
         ) %>%
         drop_na()
+    
+    return(as_tibble(output))
 }
 
+# estimate all portfoios
+model_name <- names(mode_tej_LS)
+beta_list <- vector("list", ncol(tej_port_us)-12)
+# don't know why for loop won't work,
+# had to manually loop over to create beta list
+beta_list[[1]] <- estimate_beta(tej_port_us, model_name[1])
+beta_list[[2]] <- estimate_beta(tej_port_us, model_name[2])
+beta_list[[3]] <- estimate_beta(tej_port_us, model_name[3])
+beta_list[[4]] <- estimate_beta(tej_port_us, model_name[4])
+beta_list[[5]] <- estimate_beta(tej_port_us, model_name[5])
+beta_list[[6]] <- estimate_beta(tej_port_us, model_name[6])
+beta_list[[7]] <- estimate_beta(tej_port_us, model_name[7])
+beta_list[[8]] <- estimate_beta(tej_port_us, model_name[8])
+beta_list[[9]] <- estimate_beta(tej_port_us, model_name[9])
+beta_list[[10]] <- estimate_beta(tej_port_us, model_name[10])
+beta_list[[11]] <- estimate_beta(tej_port_us, model_name[11])
+beta_list[[12]] <- estimate_beta(tej_port_us, model_name[12])
+beta_list[[13]] <- estimate_beta(tej_port_us, model_name[13])
+beta_list[[14]] <- estimate_beta(tej_port_us, model_name[14])
 
+# join all betas
+beta_df <- beta_list %>%
+    reduce(left_join, by = c("Ticker", "date"))
+# remove beta list and output beta dataframes to save memory
+rm(beta_list)
+write.csv(beta_df, "betas.csv")
 
 # beta distribution boxplot by industry
 
@@ -109,23 +134,4 @@ tej_port_us %>%
     labs(
         x = NULL, y = NULL,
         title = "Firm-specific beta distributions by industry"
-    )
-
-beta_nested %>%
-    drop_na(beta_monthly) %>%
-    group_by(date) %>%
-    reframe(
-        x = quantile(beta_monthly, seq(0.1, 0.9, 0.1)),
-        quantile = 100 * seq(0.1, 0.9, 0.1)
-    ) %>%
-    ggplot(aes(
-        x = date, 
-        y = x, 
-        color = as_factor(quantile),
-        linetype = as_factor(quantile)
-    )) +
-    geom_line() +
-    labs(
-        x = NULL, y = NULL, color = NULL, linetype = NULL,
-        title = "Monthly deciles of estimated betas",
     )
