@@ -154,38 +154,6 @@ names(res.mode_LS) <- paste(
 )
 result <- map(res.mode_LS, glance)
 
-# regression to Mkt_RF
-
-mode_LS_Mkt_RF <- lapply(paste(
-    names(PORT_USMARKET_LS_ff)[5:ncol(PORT_USMARKET_LS_ff)], "Mkt_RF", sep = "~"
-    ), formula
-)
-res.mode_LS_Mkt_RF <- lapply(mode_LS_Mkt_RF, FUN = function(x){
-    summary(lm(formula = x, data = PORT_USMARKET_LS_ff))
-    }
-)
-names(res.mode_LS_Mkt_RF) <- paste(
-    names(PORT_USMARKET_LS_ff)[5:ncol(PORT_USMARKET_LS_ff)], "Mkt_RF", sep = "~"
-)
-result_list_Mkt_RF <- map(res.mode_LS_Mkt_RF, glance)
-result_Mkt_RF <- do.call(rbind, result_list_Mkt_RF)
-
-# regression to Mkt_RF, HML, SMB
-
-mode_LS_ff <- lapply(paste(
-    names(PORT_USMARKET_LS_ff)[5:ncol(PORT_USMARKET_LS_ff)], "Mkt_RF + HML + SMB", sep = "~"
-), formula
-)
-res.mode_LS_ff <- lapply(mode_LS_ff, FUN = function(x){
-    summary(lm(formula = x, data = PORT_USMARKET_LS_ff))
-}
-)
-names(res.mode_LS_ff) <- paste(
-    names(PORT_USMARKET_LS_ff)[5:ncol(PORT_USMARKET_LS_ff)], "Mkt_RF + HML + SMB", sep = "~"
-)
-result_list_ff <- map(res.mode_LS_ff, glance)
-result_ff <- do.call(rbind, result_list_ff)
-
 # regression to Mkt_RF broom::tidy method
 Mkt_result <- PORT_USMARKET_LS_ff %>%
     select(-date, -SMB, -HML) %>%
