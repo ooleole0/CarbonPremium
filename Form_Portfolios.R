@@ -4,7 +4,12 @@ library(dplyr)
 library(tidyverse)
 
 mrets = fread("CRSP_WEIGHT.csv")
-vars = fread("INDEVAR3_SORT.csv")
+vars = fread("INDEVAR3_SORT.csv") %>%
+    select(
+        -s1IntSec,
+        -s1_2IntSec,
+        -s1_2_3IntSec
+    )
 
 
 setkey(vars, sorting_year, gvkey)
@@ -20,7 +25,7 @@ June_data <- merge(vars,June_Crsp)
 June_data_tiled <- June_data %>% 
     group_by(sorting_year) %>%
     mutate(
-        across(10:26, ~ntile(., 5))
+        across(10:24, ~ntile(., 5))
     ) %>%
     ungroup() %>%
     as.data.table()
@@ -70,9 +75,9 @@ Portf_scope_1_2_3_Int <- wide(IndivStocks, scope_1_2_3_Int, "scope_1_2_3_Int")
 Portf_scope_1_grow <- wide(IndivStocks, scope_1_grow, "scope_1_grow")
 Portf_scope_1_2_grow <- wide(IndivStocks, scope_1_2_grow, "scope_1_2_grow")
 Portf_scope_1_2_3_grow <- wide(IndivStocks, scope_1_2_3_grow, "scope_1_2_3_grow")
-Portf_s1IntSec <- wide(IndivStocks, s1IntSec, "s1IntSec")
-Portf_s1_2IntSec <- wide(IndivStocks, s1_2IntSec, "s1_2IntSec")
-Portf_s1_2_3IntSec <- wide(IndivStocks, s1_2_3IntSec, "s1_2_3IntSec")
+Portf_s1IntSecDev <- wide(IndivStocks, s1IntSecDev, "s1IntSecDev")
+Portf_s1_2IntSecDev <- wide(IndivStocks, s1_2IntSecDev, "s1_2IntSecDev")
+Portf_s1_2_3IntSecDev <- wide(IndivStocks, s1_2_3IntSecDev, "s1_2_3IntSecDev")
 
 Portf_list <- list(
     Portf_scope_1,
@@ -86,9 +91,9 @@ Portf_list <- list(
     Portf_scope_1_grow,
     Portf_scope_1_2_grow,
     Portf_scope_1_2_3_grow,
-    Portf_s1IntSec,
-    Portf_s1_2IntSec,
-    Portf_s1_2_3IntSec
+    Portf_s1IntSecDev,
+    Portf_s1_2IntSecDev,
+    Portf_s1_2_3IntSecDev
 )
 Portf <- Portf_list %>% reduce(full_join, by = "date")
 
@@ -105,9 +110,9 @@ Portf_LS <- Portf %>%
     scope1Grow_LS = scope_1_growType5 - scope_1_growType1,
     scope1_2Grow_LS = scope_1_2_growType5 - scope_1_2_growType1,
     scope1_2_3Grow_LS = scope_1_2_3_growType5 - scope_1_2_3_growType1,
-    s1IntSecDev_LS = s1IntSecType5 - s1IntSecType1,
-    s1_2IntSecDev_LS = s1_2IntSecType5 - s1_2IntSecType1,
-    s1_2_3IntSecDev_LS = s1_2_3IntSecType5 - s1_2_3IntSecType1
+    s1IntSecDev_LS = s1IntSecDevType5 - s1IntSecDevType1,
+    s1_2IntSecDev_LS = s1_2IntSecDevType5 - s1_2IntSecDevType1,
+    s1_2_3IntSecDev_LS = s1_2_3IntSecDevType5 - s1_2_3IntSecDevType1
 ) %>% select(date, ends_with("LS"))
 
 # ts.plot(Portf_LS[,"scope1_LS"])

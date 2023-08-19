@@ -9,9 +9,16 @@ TWBCode <- read_csv("TWBCode.csv")
 tej <- tej %>%
     select(-BName) %>%
     left_join(TWBCode, by = join_by(BCode == Mid_BCode)) %>%
-    select(-BCode, -Mid_BName) %>%
-    mutate(BCode = Large_BCode, BName = Large_BName) %>%
-    select(-Large_BCode)
+    select(-BCode, -Mid_BName)%>%
+    select(date,
+           Ticker,
+           CName,
+           UNINO,
+           MktSize,
+           Ret,
+           BCode = Large_BCode, 
+           BName = Large_BName
+    )
 
 port_us <- read_csv("PORT_USMARKET_LS_ff.csv") %>%
     select(-...1)
@@ -22,10 +29,10 @@ tej_port_us <- tej %>%
 # create formula lists and names
 mode_tej_LS <- lapply(
     paste(
-    "Ret", names(tej_port_us)[13:ncol(tej_port_us)], sep = "~"
+    "Ret", names(tej_port_us)[12:ncol(tej_port_us)], sep = "~"
     ), formula
 )
-names(mode_tej_LS) <- names(tej_port_us)[13:ncol(tej_port_us)]
+names(mode_tej_LS) <- names(tej_port_us)[12:ncol(tej_port_us)]
 
 # create a function which checks on if the time series is too short,
 # if not, return beta.
@@ -95,7 +102,7 @@ estimate_beta <- function(data, var_port){
 
 # estimate all portfoios
 model_name <- names(mode_tej_LS)
-beta_list <- vector("list", ncol(tej_port_us)-12)
+beta_list <- vector("list", length(mode_tej_LS))
 # don't know why for loop won't work,
 # had to manually loop over to create beta list
 beta_list[[1]] <- estimate_beta(tej_port_us, model_name[1])
@@ -122,16 +129,16 @@ write.csv(beta_df, "betas.csv")
 
 # beta distribution boxplot by industry
 
-tej_port_us %>%
-    left_join(beta_nested, by = c("Ticker", "date")) %>%
-    drop_na(beta_monthly) %>%
-    group_by(BName, Ticker) %>%
-    summarize(beta = mean(beta_monthly), 
-              .groups = "drop") %>%
-    ggplot(aes(x = reorder(BName, beta, FUN = median), y = beta)) +
-    geom_boxplot() +
-    coord_flip() +
-    labs(
-        x = NULL, y = NULL,
-        title = "Firm-specific beta distributions by industry"
-    )
+# tej_port_us %>%
+#     left_join(beta_nested, by = c("Ticker", "date")) %>%
+#     drop_na(beta_monthly) %>%
+#     group_by(BName, Ticker) %>%
+#     summarize(beta = mean(beta_monthly), 
+#               .groups = "drop") %>%
+#     ggplot(aes(x = reorder(BName, beta, FUN = median), y = beta)) +
+#     geom_boxplot() +
+#     coord_flip() +
+#     labs(
+#         x = NULL, y = NULL,
+#         title = "Firm-specific beta distributions by industry"
+#     )

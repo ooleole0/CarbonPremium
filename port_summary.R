@@ -31,4 +31,4 @@ df <- data.frame(
 names(df) <- c(port_name, mean_name, sd_name, sharpe_name, skew_name, kurt_name)
 df <- mutate_if(df, is.numeric, round, digits = 3)
 
-write.csv(df, "df.csv")
+stargazer(df, type = "html", out = "df.doc", summary = FALSE)

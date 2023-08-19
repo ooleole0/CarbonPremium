@@ -138,7 +138,7 @@ PORT_USMARKET_LS_ff <- PORT_USMARKET %>%
         s1_2IntSecDev_LS = s1_2IntSecDev_LS * -1,
         s1_2_3IntSecDev_LS = s1_2_3IntSecDev_LS * -1
     )
-
+write.csv(PORT_USMARKET_LS_ff, "PORT_USMARKET_LS_ff.csv")
 # regression to 1
 
 mode_LS <- lapply(paste(
