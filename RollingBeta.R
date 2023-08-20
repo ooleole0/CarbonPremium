@@ -56,9 +56,9 @@ roll_capm_estimation <- function(data, var_port) {
         .i = data$date,
         .period = "month",
         # minimum observation as 48
-        .f = ~ estimate_capm(., min_obs = 48, var_port),
+        .f = ~ estimate_capm(., min_obs = 36, var_port),
         # backtest period as 60(59+1)
-        .before = 59,
+        .before = 36,
         .complete = FALSE
     )
     # return a tibble with months and corresponding beta estimates
