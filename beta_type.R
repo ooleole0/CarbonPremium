@@ -77,16 +77,18 @@ Portf_LS <- Portf %>%
         scope3_LS = scope3_LS_betaType5 - scope3_LS_betaType1,
         scope1_2_LS = scope1_2_LS_betaType5 - scope1_2_LS_betaType1,
         scope1_2_3_LS = scope1_2_3_LS_betaType5 - scope1_2_3_LS_betaType1,
-        scope1Int_LS = scope1Int_LS_betaType5 - scope1Int_LS_betaType1,
-        scope1_2Int_LS = scope1_2Int_LS_betaType5 - scope1_2Int_LS_betaType1,
-        scope1_2_3Int_LS = scope1_2_3Int_LS_betaType5 - scope1_2_3Int_LS_betaType1,
         scope1Grow_LS = scope1Grow_LS_betaType5 - scope1Grow_LS_betaType1,
         scope1_2Grow_LS = scope1_2Grow_LS_betaType5 - scope1_2Grow_LS_betaType1,
         scope1_2_3Grow_LS = scope1_2_3Grow_LS_betaType5 - scope1_2_3Grow_LS_betaType1,
+        scope1Int_LS = scope1Int_LS_betaType5 - scope1Int_LS_betaType1,
+        scope1_2Int_LS = scope1_2Int_LS_betaType5 - scope1_2Int_LS_betaType1,
+        scope1_2_3Int_LS = scope1_2_3Int_LS_betaType5 - scope1_2_3Int_LS_betaType1,
         s1IntSecDev_LS = s1IntSecDev_LS_betaType5 - s1IntSecDev_LS_betaType1,
         s1_2IntSecDev_LS = s1_2IntSecDev_LS_betaType5 - s1_2IntSecDev_LS_betaType1,
         s1_2_3IntSecDev_LS = s1_2_3IntSecDev_LS_betaType5 - s1_2_3IntSecDev_LS_betaType1
     ) %>% select(date, ends_with("LS"))
+
+write.csv(Portf_LS, "TWportLS.csv")
 
 TW_Mkt_Rf <- read_csv("TWMKTRF.csv")
 
@@ -118,3 +120,5 @@ Mkt_result <- Port_LS_TW %>%
     do(tidy(lm(return~TW_Mkt_Rf, .))) %>%
     ungroup() %>%
     mutate_if(is.numeric, round, digits = 3)
+
+stargazer(Mkt_result, type = "html", out = "TWMkt_result.doc", summary = FALSE)

@@ -174,7 +174,7 @@ ff_result <- PORT_USMARKET_LS_ff %>%
     mutate_if(is.numeric, round, digits = 3)
 
 # stargazer output
-stargazer(ff_result, type = "html", 
+stargazer(Mkt_result, type = "html", 
           summary = FALSE, 
           rownames = FALSE, 
-          out = "ff_result.doc")
+          out = "Mkt_result.doc")
