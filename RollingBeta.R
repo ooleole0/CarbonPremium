@@ -128,17 +128,58 @@ rm(beta_list)
 write.csv(beta_df, "betas.csv")
 
 # beta distribution boxplot by industry
-
-# tej_port_us %>%
-#     left_join(beta_nested, by = c("Ticker", "date")) %>%
-#     drop_na(beta_monthly) %>%
-#     group_by(BName, Ticker) %>%
-#     summarize(beta = mean(beta_monthly), 
-#               .groups = "drop") %>%
-#     ggplot(aes(x = reorder(BName, beta, FUN = median), y = beta)) +
-#     geom_boxplot() +
-#     coord_flip() +
-#     labs(
-#         x = NULL, y = NULL,
-#         title = "Firm-specific beta distributions by industry"
-#     )
+# create dataframe for ploting
+df_boxplot <- tej_port_us %>%
+    left_join(beta_df, by = c("Ticker", "date")) %>%
+    drop_na() %>%
+    group_by(BName, Ticker) %>%
+    summarise(
+        across(scope1_LS_beta:s1_2_3IntSecDev_LS_beta, 
+        ~ mean(.x, na.rm = TRUE)
+        )
+    )
+# boxplots for absolute emissions
+df_boxplot %>% 
+    select(BName, Ticker, scope1_LS_beta: scope1_2_3_LS_beta) %>%
+    pivot_longer(
+        cols = ends_with("beta"), 
+        names_to = "LS_type",
+        values_to = "beta"
+    ) %>%
+    ggplot(aes(x = reorder(BName, beta, FUN = median), y = beta)) +
+    geom_boxplot() +
+    coord_flip() +
+    facet_wrap(~ LS_type) +
+    labs(
+        x = NULL, y = NULL,
+    )
+# boxplots for emissions growths
+df_boxplot %>% 
+    select(BName, Ticker, scope1Grow_LS_beta: scope1_2_3Grow_LS_beta) %>%
+    pivot_longer(
+        cols = ends_with("beta"), 
+        names_to = "LS_type",
+        values_to = "beta"
+    ) %>%
+    ggplot(aes(x = reorder(BName, beta, FUN = median), y = beta)) +
+    geom_boxplot() +
+    coord_flip() +
+    facet_wrap(~ LS_type) +
+    labs(
+        x = NULL, y = NULL,
+    )
+# boxplots for emission intensity related variables
+df_boxplot %>% 
+    select(BName, Ticker, scope1Int_LS_beta: s1_2_3IntSecDev_LS_beta) %>%
+    pivot_longer(
+        cols = ends_with("beta"), 
+        names_to = "LS_type",
+        values_to = "beta"
+    ) %>%
+    ggplot(aes(x = reorder(BName, beta, FUN = median), y = beta)) +
+    geom_boxplot() +
+    coord_flip() +
+    facet_wrap(~ LS_type) +
+    labs(
+        x = NULL, y = NULL,
+    )

@@ -128,3 +128,63 @@ PORT_USMARKET <- Portf_LS %>% mutate(
 # PORT_USMARKET %>% mutate_if(is.numeric, round, digit = 3)
 
 write.csv(PORT_USMARKET, "PORT_USMARKET.csv")
+
+# line plot of absolute emissions
+PORT_USMARKET %>% 
+    select(date, scope1_LS:scope1_2_3_LS) %>%
+    na.omit() %>% 
+    mutate(
+    across(scope1_LS:scope1_2_3_LS, ~(as.numeric(.x)+1))
+) %>%
+    mutate(
+    across(scope1_LS:scope1_2_3_LS, cumprod)
+) %>%
+    pivot_longer(
+        cols = ends_with("LS"),
+        names_to = "LS_type",
+        values_to = "ret"
+    ) %>%
+    ggplot(aes(x = date)) +
+    geom_line(aes(y = ret, color = LS_type)) +
+    labs(x = "Date", y = "Cumulative returns") +
+    scale_y_continuous(labels = scales::percent)
+
+# line plot of emission growth
+PORT_USMARKET %>% 
+    select(date, scope1Grow_LS:scope1_2_3Grow_LS) %>%
+    na.omit() %>% 
+    mutate(
+        across(scope1Grow_LS:scope1_2_3Grow_LS, ~(as.numeric(.x)+1))
+    ) %>%
+    mutate(
+        across(scope1Grow_LS:scope1_2_3Grow_LS, cumprod)
+    ) %>%
+    pivot_longer(
+        cols = ends_with("LS"),
+        names_to = "LS_type",
+        values_to = "ret"
+    ) %>%
+    ggplot(aes(x = date)) +
+    geom_line(aes(y = ret, color = LS_type)) +
+    labs(x = "Date", y = "Cumulative returns") +
+    scale_y_continuous(labels = scales::percent)
+
+# line plot of emission intensity
+PORT_USMARKET %>% 
+    select(date, contains("Int")) %>%
+    na.omit() %>% 
+    mutate(
+        across(scope1Int_LS:s1_2_3IntSecDev_LS, ~(as.numeric(.x)+1))
+    ) %>%
+    mutate(
+        across(scope1Int_LS:s1_2_3IntSecDev_LS, cumprod)
+    ) %>%
+    pivot_longer(
+        cols = ends_with("LS"),
+        names_to = "LS_type",
+        values_to = "ret"
+    ) %>%
+    ggplot(aes(x = date)) +
+    geom_line(aes(y = ret, color = LS_type)) +
+    labs(x = "Date", y = "Cumulative returns") +
+    scale_y_continuous(labels = scales::percent)

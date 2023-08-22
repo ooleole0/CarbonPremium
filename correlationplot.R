@@ -76,6 +76,7 @@ ggheatmap <- ggplot(melted_cormat, aes(Var2, Var1, fill = value))+
     theme_minimal()+ # minimal theme
     theme(axis.text.x = element_text(angle = 45, vjust = 1, 
                                      size = 12, hjust = 1))+
-    coord_fixed()
+    coord_fixed()+
+    labs(x=NULL, y=NULL)
 # Print the heatmap
 print(ggheatmap)
