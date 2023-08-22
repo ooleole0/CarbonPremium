@@ -1,18 +1,19 @@
 library(stargazer)
 library(PerformanceAnalytics)
 
-port_mean <- numeric(ncol(PORT_USMARKET_LS_ff)-4)
+PORT_USMARKET_LS_ff <- read.csv("PORT_USMARKET_LS_ff.csv")
+port_mean <- numeric(ncol(PORT_USMARKET_LS_ff)-5)
 port_sd <- port_mean
 port_skewness <- port_mean
 port_kurtosis <- port_mean
-port_names <- colnames(PORT_USMARKET_LS_ff[, 5:18])
+port_names <- colnames(PORT_USMARKET_LS_ff[, 6:19])
 
 # summary for us carbon LS portfolios
-for (i in 5:ncol(PORT_USMARKET_LS_ff)){
-    port_mean[i-4] <- mean(PORT_USMARKET_LS_ff[,i], na.rm = TRUE)
-    port_sd[i-4] <- sd(PORT_USMARKET_LS_ff[,i], na.rm = TRUE)
-    port_skewness[i-4] <- skewness(PORT_USMARKET_LS_ff[,i], na.rm = TRUE)
-    port_kurtosis[i-4] <- kurtosis(PORT_USMARKET_LS_ff[,i], na.rm = TRUE)
+for (i in 6:ncol(PORT_USMARKET_LS_ff)){
+    port_mean[i-5] <- mean(PORT_USMARKET_LS_ff[,i], na.rm = TRUE)
+    port_sd[i-5] <- sd(PORT_USMARKET_LS_ff[,i], na.rm = TRUE)
+    port_skewness[i-5] <- skewness(PORT_USMARKET_LS_ff[,i], na.rm = TRUE)
+    port_kurtosis[i-5] <- kurtosis(PORT_USMARKET_LS_ff[,i], na.rm = TRUE)
 }
 # calculate sharpe ratio manually
 port_sharpe <- (port_mean/port_sd) * sqrt(12)

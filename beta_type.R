@@ -98,19 +98,14 @@ Port_LS_TW <- Portf_LS %>%
 summary(lm(scope1_LS ~ 1, data = Port_LS_TW))
 
 # regression to 1
-mode_LS_1 <- lapply(paste(
-    names(Port_LS_TW)[2:(ncol(Port_LS_TW)-3)], "1", sep = "~"
-    ), formula
-)
-res.mode_LS_1 <- lapply(mode_LS_1, FUN = function(x){
-    summary(lm(formula = x, data = Port_LS_TW))
-    }
-)
-names(res.mode_LS_1) <- paste(
-    names(Port_LS_TW)[2:(ncol(Port_LS_TW)-3)], "1", sep = "~"
-)
-result_LS_1 <- map(res.mode_LS_1, glance)
-result_LS_1 <- do.call(rbind, result_LS_1)
+result_LS_1 <- Port_LS_TW %>%
+    select(-date, -TW_Mkt, -TW_Rf, -TW_Mkt_Rf) %>%
+    gather(portfolio, return) %>%
+    group_by(portfolio) %>%
+    do(tidy(lm(return~1, .))) %>%
+    ungroup() %>%
+    mutate_if(is.numeric, round, digits = 3)
+stargazer(result_LS_1, type = "html", out = "TWregResult1.doc", summary = FALSE)
 
 # regression to TW_Mkt_Rf
 Mkt_result <- Port_LS_TW %>%
@@ -120,5 +115,4 @@ Mkt_result <- Port_LS_TW %>%
     do(tidy(lm(return~TW_Mkt_Rf, .))) %>%
     ungroup() %>%
     mutate_if(is.numeric, round, digits = 3)
-
 stargazer(Mkt_result, type = "html", out = "TWMkt_result.doc", summary = FALSE)

@@ -140,20 +140,14 @@ PORT_USMARKET_LS_ff <- PORT_USMARKET %>%
     )
 write.csv(PORT_USMARKET_LS_ff, "PORT_USMARKET_LS_ff.csv")
 # regression to 1
-
-mode_LS <- lapply(paste(
-    names(PORT_USMARKET_LS_ff)[5:ncol(PORT_USMARKET_LS_ff)], "1", sep = "~"
-    ), formula
-)
-res.mode_LS <- lapply(mode_LS, FUN = function(x){
-    summary(lm(formula = x, data = PORT_USMARKET_LS_ff))
-    }
-)
-names(res.mode_LS) <- paste(
-    names(PORT_USMARKET_LS_ff)[5:ncol(PORT_USMARKET_LS_ff)], "1", sep = "~"
-)
-result <- map(res.mode_LS, glance)
-
+result_1 <- PORT_USMARKET_LS_ff %>%
+    select(-date, -SMB, -HML, -Mkt_RF) %>%
+    gather(portfolio, return) %>%
+    group_by(portfolio) %>%
+    do(tidy(lm(return~1, .))) %>%
+    ungroup() %>%
+    mutate_if(is.numeric, round, digits = 3)
+stargazer(result_1, type = "html", summary = FALSE, out = "USregResult1.doc")
 # regression to Mkt_RF broom::tidy method
 Mkt_result <- PORT_USMARKET_LS_ff %>%
     select(-date, -SMB, -HML) %>%
