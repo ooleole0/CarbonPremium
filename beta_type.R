@@ -115,6 +115,7 @@ Mkt_result <- Port_LS_TW %>%
     do(tidy(lm(return~TW_Mkt_Rf, .))) %>%
     ungroup() %>%
     mutate_if(is.numeric, round, digits = 3)
+
 stargazer(Mkt_result, type = "html", out = "TWMkt_result.doc", summary = FALSE)
 
 # create cumulative return dataframe
@@ -158,3 +159,6 @@ Portf_LS_cum %>% select(date, scope1Int_LS:s1_2_3IntSecDev_LS) %>%
     geom_line(aes(y = ret, color = LS_type)) +
     labs(x = "Date", y = "Cumulative returns") +
     scale_y_continuous(labels = scales::percent)
+
+stargazer(Mkt_result, type = "html", out = "TWMkt_result.doc", summary = FALSE)
+
