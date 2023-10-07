@@ -127,6 +127,121 @@ beta_df <- beta_list %>%
 rm(beta_list)
 write.csv(beta_df, "betas.csv")
 
+# filter betas in 2015 and 2016
+beta_df_1516 <- beta_df %>%
+    filter(year(date) == c(2015, 2016)) %>%
+    group_by(year = year(date), Ticker) %>%
+    summarise(
+        across(scope1_LS_beta:s1_2_3IntSecDev_LS_beta, 
+        ~ mean(.x, na.rm = TRUE)
+        )
+    )
+# factorize year
+beta_df_1516$year <- as.factor(beta_df_1516$year)
+# histograms for absolute emissions
+beta_df_1516 %>%
+    select(year, Ticker, scope1_LS_beta: scope1_2_3_LS_beta) %>%
+    pivot_longer(
+        cols = ends_with("beta"), 
+        names_to = "LS_type",
+        values_to = "beta"
+    ) %>%
+    ggplot(aes(x = beta, fill = year)) +
+    geom_histogram(binwidth=0.1, position="dodge") +
+    xlim(-3, 3) +
+    facet_wrap(~ LS_type) +
+    labs(
+        x = NULL, y = NULL,
+    )
+# histograms for emissions growths
+beta_df_1516 %>%
+    select(year, Ticker, scope1Grow_LS_beta: scope1_2_3Grow_LS_beta) %>%
+    pivot_longer(
+        cols = ends_with("beta"), 
+        names_to = "LS_type",
+        values_to = "beta"
+    ) %>%
+    ggplot(aes(x = beta, fill = year)) +
+    geom_histogram(binwidth=0.1, position="dodge") +
+    xlim(-3, 3) +
+    facet_wrap(~ LS_type) +
+    labs(
+        x = NULL, y = NULL,
+    )
+# histograms for emission intensity related variables
+beta_df_1516 %>%
+    select(year, Ticker, scope1Int_LS_beta: s1_2_3IntSecDev_LS_beta) %>%
+    pivot_longer(
+        cols = ends_with("beta"), 
+        names_to = "LS_type",
+        values_to = "beta"
+    ) %>%
+    ggplot(aes(x = beta, fill = year)) +
+    geom_histogram(binwidth=0.1, position="dodge") +
+    xlim(-3, 3) +
+    facet_wrap(~ LS_type) +
+    labs(
+        x = NULL, y = NULL,
+    )
+
+# filter betas in 2019 and 2020
+beta_df_1920 <- beta_df %>%
+    filter(year(date) == c(2019, 2020)) %>%
+    group_by(year = year(date), Ticker) %>%
+    summarise(
+        across(scope1_LS_beta:s1_2_3IntSecDev_LS_beta, 
+               ~ mean(.x, na.rm = TRUE)
+        )
+    )
+# factorize year
+beta_df_1920$year <- as.factor(beta_df_1920$year)
+# histograms for absolute emissions
+beta_df_1920 %>%
+    select(year, Ticker, scope1_LS_beta: scope1_2_3_LS_beta) %>%
+    pivot_longer(
+        cols = ends_with("beta"), 
+        names_to = "LS_type",
+        values_to = "beta"
+    ) %>%
+    ggplot(aes(x = beta, fill = year)) +
+    geom_histogram(binwidth=0.1, position="dodge") +
+    xlim(-3, 3) +
+    facet_wrap(~ LS_type) +
+    labs(
+        x = NULL, y = NULL,
+    )
+# histograms for emissions growths
+beta_df_1920 %>%
+    select(year, Ticker, scope1Grow_LS_beta: scope1_2_3Grow_LS_beta) %>%
+    pivot_longer(
+        cols = ends_with("beta"), 
+        names_to = "LS_type",
+        values_to = "beta"
+    ) %>%
+    ggplot(aes(x = beta, fill = year)) +
+    geom_histogram(binwidth=0.1, position="dodge") +
+    xlim(-3, 3) +
+    facet_wrap(~ LS_type) +
+    labs(
+        x = NULL, y = NULL,
+    )
+# histograms for emission intensity related variables
+beta_df_1920 %>%
+    select(year, Ticker, scope1Int_LS_beta: s1_2_3IntSecDev_LS_beta) %>%
+    pivot_longer(
+        cols = ends_with("beta"), 
+        names_to = "LS_type",
+        values_to = "beta"
+    ) %>%
+    ggplot(aes(x = beta, fill = year)) +
+    geom_histogram(binwidth=0.1, position="dodge") +
+    xlim(-3, 3) +
+    facet_wrap(~ LS_type) +
+    labs(
+        x = NULL, y = NULL,
+    )
+
+
 # beta distribution boxplot by industry
 # create dataframe for ploting
 df_boxplot <- tej_port_us %>%
